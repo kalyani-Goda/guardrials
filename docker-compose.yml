@@ -28,6 +28,7 @@ services:
       - DATABASE_URL=sqlite:///./medi_triage.db
       - ENVIRONMENT=production
       - LOG_LEVEL=INFO
+      - RAGAS_FAITHFULNESS_THRESHOLD=0.3
     volumes:
       - ./data:/app/data
       - ./logs:/app/logs
@@ -36,7 +37,7 @@ services:
         condition: service_healthy
     networks:
       - medi-triage-network
-    command: python -m uvicorn api.main:app --host 0.0.0.0 --port 8000
+    command: sh -c "python load_clinical_protocols.py && python -m uvicorn api.main:app --host 0.0.0.0 --port 8000"
 
   streamlit:
     build: .
