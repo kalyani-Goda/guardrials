@@ -208,7 +208,7 @@ VECTOR_STORE_PATH = "data/vector_store/"
 
 ## Running the System
 
-### Quick Start (All-in-One)
+### 5-Layer Setup (All-in-One)
 
 ```bash
 # Terminal 1: Redis Server

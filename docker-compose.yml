@@ -23,7 +23,7 @@ services:
       - "8000:8000"
     environment:
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
-      - REDIS_HOST=redis
+      - REDIS_HOST=medi-triage-redis
       - REDIS_PORT=6379
       - DATABASE_URL=sqlite:///./medi_triage.db
       - ENVIRONMENT=production
@@ -44,7 +44,8 @@ services:
     ports:
       - "8501:8501"
     environment:
-      - API_URL=http://fastapi:8000
+      - API_URL=http://medi-triage-fastapi:8000
+      - ENVIRONMENT=production
     volumes:
       - ./data:/app/data
       - ./logs:/app/logs

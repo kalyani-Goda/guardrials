@@ -32,6 +32,7 @@
 
 | Feature | Status | Time | Tests |
 |---------|--------|------|-------|
+| Prompt Injection Detection | ✅ PASS | 0.14s | 1 |
 | Agent Initialization | ✅ PASS | 0.12s | 1 |
 | Emergency Detection | ✅ PASS | 0.24s | 1 |
 | Normal Interaction | ✅ PASS | 0.31s | 1 |
@@ -47,7 +48,6 @@
 | Agent Status | ✅ PASS | 0.15s | 1 |
 | Error Handling | ✅ PASS | 0.18s | 1 |
 | Global Agent | ✅ PASS | 0.17s | 1 |
-| Layer Initialization | ✅ PASS | 0.16s | 1 |
 
 **Total Time:** 16.34 seconds | **Average Per Test:** 1.02 seconds
 

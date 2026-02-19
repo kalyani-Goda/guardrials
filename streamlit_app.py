@@ -58,15 +58,22 @@ st.markdown("""
 # Configuration
 # ============================================================
 
-API_BASE_URL = st.secrets.get("api_url", "http://localhost:8000")
+# Determine API URL based on environment
+import os
+if os.environ.get("ENVIRONMENT") == "production":
+    # Running in Docker - use API_URL from environment or default to service name
+    API_BASE_URL = os.environ.get("API_URL", "http://medi-triage-fastapi:8000")
+else:
+    # Running locally - use localhost
+    API_BASE_URL = st.secrets.get("api_url", "http://localhost:8000")
+
 REFRESH_INTERVAL = 5  # seconds
 
 # ============================================================
 # Utility Functions
 # ============================================================
 
-@st.cache_resource
-def get_session_state():
+def init_session_state():
     """Initialize session state"""
     if 'authenticated' not in st.session_state:
         st.session_state.authenticated = False
@@ -83,9 +90,9 @@ def api_call(endpoint: str, method: str = "GET", data: Optional[Dict] = None):
         url = f"{API_BASE_URL}{endpoint}"
         
         if method == "GET":
-            response = requests.get(url, timeout=10)
+            response = requests.get(url, timeout=60)
         elif method == "POST":
-            response = requests.post(url, json=data, timeout=10)
+            response = requests.post(url, json=data, timeout=60)
         else:
             return None
             
@@ -654,7 +661,9 @@ def page_patient_book_appointment():
 
 def main():
     """Main application flow"""
-    session = get_session_state()
+    # Initialize session state
+    init_session_state()
+    session = st.session_state
     
     # Sidebar navigation
     if session.authenticated:

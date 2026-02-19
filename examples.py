@@ -69,8 +69,11 @@ def example_2_normal_triage():
     
     if "reasoning_result" in result:
         print(f"\n📚 Reasoning Layer:")
-        print(f"   Triage Category: {result['reasoning_result']['triage_category']}")
-        print(f"   Faithfulness Score: {result['reasoning_result']['faithfulness_score']:.2%}")
+        triage_cat = result['reasoning_result']['triage_category'] or "N/A"
+        faith_score = result['reasoning_result']['faithfulness_score']
+        faith_str = f"{faith_score:.2%}" if faith_score is not None else "N/A"
+        print(f"   Triage Category: {triage_cat}")
+        print(f"   Faithfulness Score: {faith_str}")
         print(f"   Response Valid: {result['reasoning_result']['is_valid']}")
 
     if "interrupt_created" in result:

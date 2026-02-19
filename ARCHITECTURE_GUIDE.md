@@ -7,7 +7,7 @@
 ## Table of Contents
 
 1. [System Overview](#system-overview)
-2. [5-Layer Guardrail Architecture](#5-layer-guardrail-architecture)
+2. [6-Layer Guardrail Architecture](#6-layer-guardrail-architecture)
 3. [Data Flow Architecture](#data-flow-architecture)
 4. [Component Details](#component-details)
 5. [Database Schema](#database-schema)
@@ -37,7 +37,7 @@
 └────────┬────────┘   └───────────────────────┘
          │
     ┌────▼──────────────────────────┐
-    │   5-Layer Guardrail System     │
+    │   6-Layer Guardrail System     │
     │  (Agent + Processing Layers)   │
     └────┬──────────────────────────┘
          │
@@ -62,7 +62,49 @@
 
 ---
 
-## 5-Layer Guardrail Architecture
+## 6-Layer Guardrail Architecture
+
+### Layer 0: Prompt Injection Detection & Safety Check
+
+**Purpose:** First line of defense - detect and prevent malicious inputs before processing
+
+```python
+class PromptInjectionDetector:
+    def detect_prompt_injection(self, user_input: str, user_id: str, session_id: str) -> dict:
+        # 1. Check for prompt injection patterns
+        injection_detected = self.analyze_injection_patterns(user_input)
+        
+        # 2. Assess risk level
+        risk_level = self.calculate_risk_level(injection_detected)
+        
+        # 3. Check for safety violations
+        issues = self.check_safety_violations(user_input)
+        
+        # 4. Return safety assessment
+        return {
+            "is_safe": risk_level not in ["HIGH", "CRITICAL"],
+            "risk_level": risk_level,
+            "detected_issues": issues,
+            "recommendation": self.get_recommendation(risk_level)
+        }
+```
+
+**Detection Capabilities:**
+- Prompt injection attempts
+- Jailbreak patterns
+- Malicious instructions
+- Safety policy violations
+- Harmful content detection
+
+**If Unsafe:**
+- ❌ Request rejected immediately
+- ❌ User receives safety message
+- ✅ Interaction logged for audit
+- ✅ No further processing occurs
+
+**Status:** ✅ Production Ready
+
+---
 
 ### Layer 1: Input Layer (PII Anonymization)
 
@@ -227,71 +269,64 @@ class ToolLayer:
 
 ---
 
-### Layer 5: Workflow Orchestration
+### Layer 5: Human-in-the-Loop - Workflow Orchestration
 
-**Purpose:** Coordinate all layers in correct sequence
+**Purpose:** Manage case workflows and human review interrupts
 
 ```python
-class WorkflowLayer:
-    def process_patient_interaction(self, user_input: str, user_id: str):
-        # Layer 1: Input Layer (PII Anonymization)
-        input_result = self.input_layer.process(user_input)
-        if not input_result["success"]:
-            return {"error": "Input validation failed"}
-        
-        anonymized_text = input_result["text"]
-        
-        # Layer 2: Dialog Layer (Emergency Detection)
-        dialog_result = self.dialog_layer.process(anonymized_text)
-        if dialog_result["action"] == "escalate_emergency":
-            return {"action": "emergency_escalation", ...}
-        if dialog_result["action"] == "reject_off_topic":
-            return {"error": "Please ask healthcare-related questions"}
-        
-        # Layer 3: Reasoning Layer (Clinical Assessment)
-        reasoning_result = self.reasoning_layer.process(anonymized_text)
-        if "error" in reasoning_result:
-            return reasoning_result
-        
-        # Layer 4: Tool Layer (Appointment Preparation)
-        tool_result = self.tool_layer.prepare_appointment(
-            patient_id=user_id,
-            assessment=reasoning_result
-        )
-        
-        # Layer 5: Workflow State Management
-        workflow_state = {
-            "input_layer": input_result,
-            "dialog_layer": dialog_result,
-            "reasoning_layer": reasoning_result,
-            "tool_layer": tool_result,
-            "timestamp": datetime.now()
+class WorkflowOrchestrator:
+    def create_advice_review_interrupt(self, session_id, user_id, anonymized_symptoms, 
+                                       generated_advice, faithfulness_score, triage_category):
+        # 1. Create interrupt record for nurse review
+        interrupt = {
+            "interrupt_id": generate_id(),
+            "user_id": user_id,
+            "symptoms": anonymized_symptoms,
+            "advice": generated_advice,
+            "faithfulness_score": faithfulness_score,
+            "triage_category": triage_category,
+            "status": "pending_nurse_review",
+            "created_at": datetime.utcnow()
         }
         
-        # Save to database
-        self.db.save_session(user_id, workflow_state)
+        # 2. Save to database
+        self.save_interrupt(interrupt)
         
-        return {"success": True, "workflow_state": workflow_state}
+        # 3. Notify nurse dashboard
+        self.notify_nurses(interrupt)
+        
+        return interrupt["interrupt_id"]
 ```
 
-**Processing Flow:**
+**Workflow Management:**
+- ✅ Creates interrupts for nurse review
+- ✅ Tracks case status through workflow
+- ✅ Manages approval/rejection workflows
+- ✅ Maintains audit trail
+
+**Status:** ✅ Production Ready
+
+---
+
+## Processing Flow
+
 ```
 User Input
     ↓
+[Layer 0] Prompt Injection Detection & Safety Check
+    ↓ (if safe)
 [Layer 1] PII Detection & Anonymization
     ↓
-[Layer 2] Emergency Check & Topic Validation
-    ↓
+[Layer 2] Emergency Detection & Topic Control
+    ↓ (if non-emergency and valid topic)
 [Layer 3] Clinical Assessment (RAG)
     ↓
 [Layer 4] Tool Authorization & Appointment Prep
     ↓
-[Layer 5] Workflow State & Database Save
+[Layer 5] Workflow State & Interrupt Creation
     ↓
-Response to User
+Response to User + Nurse Review Notification
 ```
-
-**Status:** ✅ Production Ready
 
 ---
 

@@ -20,7 +20,7 @@
 ## 🎯 Overview
 
 A **production-grade healthcare AI triage system** with:
-- ✅ **5-layer guardrails** for patient safety
+- ✅ **6-layer guardrails** for patient safety (including Layer 0 Prompt Injection Detection)
 - ✅ **HIPAA compliance** with PII anonymization
 - ✅ **Patient case tracking** with real-time status updates
 - ✅ **Nurse approval workflow** with detailed notes
@@ -32,52 +32,62 @@ A **production-grade healthcare AI triage system** with:
 
 ## ✨ Key Features
 
-### 1. **Patient Case Submission**
-- Patients submit medical symptoms
-- AI triage generates assessment
-- System flags for nurse review if needed
+### 1. **Safety-First Design (Layer 0)**
+- Prompt injection detection and prevention
+- Safety checks on all incoming requests
+- Prevents malicious inputs before processing
+- Real-time threat assessment
 
-### 2. **Nurse Review & Approval**
+### 2. **Patient Case Submission**
+- Patients submit medical symptoms
+- AI triage generates assessment via clinical RAG
+- System flags for nurse review if needed
+- All layers process input safely
+
+### 3. **Nurse Review & Approval**
 - Nurses see pending cases in dashboard
 - Can approve with detailed notes (documents needed, instructions, etc.)
 - Can reject with feedback reasons
 - Notes saved and visible to patients
 
-### 3. **Patient Case Status Tracking**
+### 4. **Patient Case Status Tracking**
 - Patients see all their cases with status
 - View approval/rejection status
 - Read nurse notes and requirements
 - See appointment eligibility
 
-### 4. **Conditional Appointment Booking**
+### 5. **Conditional Appointment Booking**
 - ✅ Available ONLY after nurse approval
 - Patients provide appointment type, date, specialist
 - System validates and confirms booking
 - Cannot book before approval
 
-### 5. **Rejection Handling**
-- If nurse rejects case, patient sees reason
-- Can resubmit case if desired
-- Clear feedback on decision
+### 6. **Emergency Detection & Routing**
+- Automatic emergency detection in Layer 2
+- Routes critical cases to 911 immediately
+- Escalates urgent cases to human review
+- Prevents delays in critical care
 
 ---
 
 ## 🏗️ System Architecture
 
-### 5-Layer Guardrail System
+### 6-Layer Guardrail System
 
 ```
-┌─────────────────────────────────────────┐
-│  Layer 5: Workflow Orchestration        │ (Combines all layers)
-├─────────────────────────────────────────┤
-│  Layer 4: Tool Authorization            │ (Appointment safety)
-├─────────────────────────────────────────┤
-│  Layer 3: Reasoning (RAG)               │ (Clinical protocols)
-├─────────────────────────────────────────┤
-│  Layer 2: Dialog Control                │ (Emergency detection)
-├─────────────────────────────────────────┤
-│  Layer 1: Input (PII Anonymization)     │ (HIPAA compliance)
-└─────────────────────────────────────────┘
+┌──────────────────────────────────────────────────┐
+│  Layer 5: Workflow Orchestration                 │ (Human-in-the-loop)
+├──────────────────────────────────────────────────┤
+│  Layer 4: Tool Authorization                     │ (Appointment safety)
+├──────────────────────────────────────────────────┤
+│  Layer 3: Reasoning (RAG)                        │ (Clinical protocols)
+├──────────────────────────────────────────────────┤
+│  Layer 2: Dialog Control                         │ (Emergency detection)
+├──────────────────────────────────────────────────┤
+│  Layer 1: Input (PII Anonymization)              │ (HIPAA compliance)
+├──────────────────────────────────────────────────┤
+│  Layer 0: Prompt Injection Detection             │ (Safety checks first)
+└──────────────────────────────────────────────────┘
 ```
 
 ### Technology Stack
