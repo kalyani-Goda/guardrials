@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "medi-triage-agent"
+version = "0.1.0"
+description = "Production-ready healthcare agent with HIPAA-compliant guardrails"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    {name = "Healthcare AI Team"},
+]
+license = {text = "MIT"}
+
+dependencies = [
+    "langchain==0.1.14",
+    "langchain-openai==0.0.8",
+    "langgraph==0.0.20",
+    "presidio-analyzer==2.2.354",
+    "presidio-anonymizer==2.2.354",
+    "nvidia-nemo-guardrails==0.8.1",
+    "sentence-transformers==2.2.2",
+    "chromadb==0.4.21",
+    "ragas==0.1.8",
+    "fastapi==0.104.1",
+    "pydantic==2.5.0",
+    "redis==5.0.1",
+    "PyJWT==2.8.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-asyncio>=0.21",
+    "pytest-cov>=4.1",
+    "black>=23.0",
+    "isort>=5.12",
+    "pylint>=3.0",
+    "mypy>=1.7",
+]
+
+[tool.setuptools]
+packages = ["app", "config", "models", "tools"]

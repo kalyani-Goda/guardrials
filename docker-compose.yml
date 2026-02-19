@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: medi-triage-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - medi-triage-network
+
+  fastapi:
+    build: .
+    container_name: medi-triage-fastapi
+    ports:
+      - "8000:8000"
+    environment:
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - DATABASE_URL=sqlite:///./medi_triage.db
+      - ENVIRONMENT=production
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - medi-triage-network
+    command: python -m uvicorn api.main:app --host 0.0.0.0 --port 8000
+
+  streamlit:
+    build: .
+    container_name: medi-triage-streamlit
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://fastapi:8000
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    depends_on:
+      - fastapi
+    networks:
+      - medi-triage-network
+    command: streamlit run streamlit_app.py --server.port 8501 --server.address 0.0.0.0
+
+volumes:
+  redis_data:
+
+networks:
+  medi-triage-network:
+    driver: bridge
